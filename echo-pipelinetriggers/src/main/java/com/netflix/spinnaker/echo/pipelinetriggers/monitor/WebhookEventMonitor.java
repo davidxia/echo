@@ -14,6 +14,7 @@
 
 package com.netflix.spinnaker.echo.pipelinetriggers.monitor;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.spectator.api.Registry;
 import com.netflix.spinnaker.echo.model.Event;
@@ -24,6 +25,7 @@ import com.netflix.spinnaker.echo.model.trigger.TriggerEvent;
 import com.netflix.spinnaker.echo.pipelinetriggers.PipelineCache;
 import com.netflix.spinnaker.echo.pipelinetriggers.artifacts.ArtifactMatcher;
 import com.netflix.spinnaker.kork.artifacts.model.Artifact;
+import java.io.IOException;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -32,7 +34,6 @@ import org.springframework.stereotype.Component;
 import rx.Observable;
 import rx.functions.Action1;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.netflix.spinnaker.echo.pipelinetriggers.artifacts.ArtifactMatcher.isConstraintInPayload;
+import static java.util.Collections.emptyList;
 
 @Component @Slf4j
 public class WebhookEventMonitor extends TriggerMonitor {
@@ -99,30 +101,36 @@ public class WebhookEventMonitor extends TriggerMonitor {
 
   @Override
   protected Predicate<Trigger> matchTriggerFor(final TriggerEvent event, final Pipeline pipeline) {
-    String type = event.getDetails().getType();
-    String source = event.getDetails().getSource();
+    try {
+      String type = event.getDetails().getType();
+      String source = event.getDetails().getSource();
 
-    return trigger ->
-      trigger.getType().equals(type) &&
-      trigger.getSource().equals(source) &&
-        (
-          // The Constraints in the Trigger could be null. That's OK.
-          trigger.getPayloadConstraints() == null ||
+      final Map payload = event.getPayload();
+      final ObjectMapper objectMapper = new ObjectMapper();
+      final String s = objectMapper.writeValueAsString(payload.getOrDefault("artifacts", emptyList()));
+      final List<Artifact> messageArtifacts = objectMapper.readValue(s, new TypeReference<List<Artifact>>() {});
+      System.out.println("MESSAGE ARTIFACTS ARE " + messageArtifacts);
 
-            // If the Constraints are present, check that there are equivalents in the webhook payload.
-            (  trigger.getPayloadConstraints() != null &&
-               isConstraintInPayload(trigger.getPayloadConstraints(), event.getPayload())
-            )
+      return trigger ->
+          trigger.getType().equals(type) &&
+          trigger.getSource().equals(source) &&
+          (
+              // The Constraints in the Trigger could be null. That's OK.
+              trigger.getPayloadConstraints() == null ||
 
-        ) &&
+              // If the Constraints are present, check that there are equivalents in the webhook payload.
+              (  trigger.getPayloadConstraints() != null &&
+                 isConstraintInPayload(trigger.getPayloadConstraints(), event.getPayload())
+              )
+
+          ) &&
           // note this returns true when no artifacts are expected
-          ArtifactMatcher.anyArtifactsMatchExpected(
-              (List<Artifact>) event
-                  .getPayload()
-                  .getOrDefault("artifacts", new ArrayList<Artifact>()),
-              trigger,
-              pipeline
-          );
+          ArtifactMatcher.anyArtifactsMatchExpected(messageArtifacts, trigger, pipeline);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    log.warn("NOOOOOOOO");
+    return null;
   }
 
   protected void onMatchingPipeline(Pipeline pipeline) {
