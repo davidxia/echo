@@ -72,6 +72,7 @@ abstract class TriggerMonitor implements EchoEventListener {
   }
 
   protected Action1<TriggerEvent> triggerEachMatchFrom(final List<Pipeline> pipelines) {
+    log.warn("PIPELINES ARE {}", pipelines);
     return event -> {
       if (isSuccessfulTriggerEvent(event)) {
         Observable.from(pipelines)

@@ -17,10 +17,16 @@
 package com.netflix.spinnaker.echo.model.trigger
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.google.common.base.MoreObjects
 import groovy.transform.Canonical
 
 @Canonical
 @JsonIgnoreProperties(ignoreUnknown = true)
 class WebhookEvent extends TriggerEvent {
   public static final String TYPE = "WEBHOOK"
+
+  @Override
+  public String toString() {
+    return "WebhookEvent{super=${super.toString()}}"
+  }
 }

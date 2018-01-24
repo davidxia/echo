@@ -32,4 +32,20 @@ class Metadata {
     String _content_id
     Map attributes
     HttpHeaders requestHeaders = new HttpHeaders()
+
+    @Override
+    public String toString() {
+        return """\
+Metadata{
+    source='$source',
+    type='$type',
+    created='$created',
+    organization='$organization',
+    project='$project',
+    application='$application',
+    _content_id='$_content_id',
+    attributes=$attributes,
+    requestHeaders=$requestHeaders
+}"""
+    }
 }

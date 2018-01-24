@@ -63,6 +63,7 @@ public class WebhookEventMonitor extends TriggerMonitor {
 
   @Override
   public void processEvent(Event event) {
+    log.warn("EVENT IN WEBHOOKEVENTMONITOR {}", event);
     super.validateEvent(event);
     if (event.getDetails().getType() == null) {
       return;
@@ -73,6 +74,8 @@ public class WebhookEventMonitor extends TriggerMonitor {
     webhookEvent.setDetails(event.getDetails());
     webhookEvent.setPayload(event.getContent());
 
+    log.warn("WEBHOOKEVENT {}", webhookEvent);
+    log.warn("PIPELINECACHE GETPIPELINES: {}", pipelineCache.getPipelines());
     Observable.just(webhookEvent)
       .doOnNext(this::onEchoResponse)
       .subscribe(triggerEachMatchFrom(pipelineCache.getPipelines()));

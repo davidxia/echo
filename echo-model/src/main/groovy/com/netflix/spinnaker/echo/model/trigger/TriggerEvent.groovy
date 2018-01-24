@@ -22,4 +22,14 @@ abstract class TriggerEvent {
   Metadata details
   Map payload
   String rawContent
+
+  @Override
+  public String toString() {
+    return """\
+TriggerEvent{
+    details=$details,
+    payload=$payload,
+    rawContent='$rawContent'
+}"""
+  }
 }

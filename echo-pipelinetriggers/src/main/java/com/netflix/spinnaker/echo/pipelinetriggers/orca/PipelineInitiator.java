@@ -2,6 +2,7 @@ package com.netflix.spinnaker.echo.pipelinetriggers.orca;
 
 import com.netflix.spinnaker.echo.model.Pipeline;
 import com.netflix.spinnaker.echo.pipelinetriggers.orca.OrcaService.TriggerResponse;
+import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,6 +55,8 @@ public class PipelineInitiator implements Action1<Pipeline> {
 
   @Override
   public void call(Pipeline pipeline) {
+    log.warn("TRIGGERING PIPELINE WITH {}", pipeline);
+    log.warn("STACK TRACE: {}", Arrays.toString(Thread.currentThread().getStackTrace()));
     if (enabled) {
       log.warn("Triggering {} due to {}", pipeline, pipeline.getTrigger());
       counter.increment("orca.requests");

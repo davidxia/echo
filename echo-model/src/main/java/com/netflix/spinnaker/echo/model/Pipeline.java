@@ -32,7 +32,7 @@ import lombok.experimental.Wither;
 @JsonDeserialize(builder = Pipeline.PipelineBuilder.class)
 @Builder
 @Wither
-@ToString(of = {"application", "name", "id"}, includeFieldNames = false)
+@ToString
 @Value public class Pipeline {
   @JsonProperty
   @NonNull String application;

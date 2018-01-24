@@ -17,6 +17,7 @@
 package com.netflix.spinnaker.echo.model
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.google.common.base.MoreObjects
 
 /**
  * Represents an event
@@ -27,4 +28,15 @@ public class Event {
   String rawContent
   @JsonInclude(JsonInclude.Include.NON_NULL)
   Map payload
+
+  @Override
+  public String toString() {
+    return """\
+Event{
+    details=$details,
+    content=$content,
+    rawContent='$rawContent',
+    payload=$payload
+}"""
+  }
 }
