@@ -49,10 +49,19 @@ public class ArtifactMatcher {
       log.warn("Parsed message artifacts (size {}) greater than expected artifacts (size {}), continuing trigger anyway", messageArtifacts.size(), expectedArtifactIds.size());
     }
 
+    for (final Object o : messageArtifacts) {
+      log.warn("message artifact is of type {}: {}", o.getClass(), o);
+    }
+    for (final Object o : expectedArtifacts) {
+      log.warn("expected artifact is of type {}: {}", o.getClass(), o);
+    }
+
     Predicate<Artifact> expectedArtifactMatch = a -> expectedArtifacts
         .stream()
         .anyMatch(e -> e.matches(a));
-    return messageArtifacts.stream().anyMatch(expectedArtifactMatch);
+    final boolean b = messageArtifacts.stream().anyMatch(expectedArtifactMatch);
+    System.out.println("DOES IT MATCH? " + b);
+    return b;
   }
 
   /**
